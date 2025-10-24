@@ -9,7 +9,8 @@ enum Error {
     FAULTY_GPU_DRIVER,
     NO_DEVICE_AVAILABLE,
     NO_QUEUE_AVAILABLE,
-    UNKNOWN_ERROR
+    UNKNOWN_ERROR,
+    OUT_OF_MEMORY
 };
 
 typedef void* Handle;
@@ -19,7 +20,9 @@ typedef struct Vulkan {
     char*     name;
     Handle    data;
     uint32_t  version;
-} Vulkan; 
+} Vulkan;
+
+typedef Handle Resource;
 
 Vulkan* LoadVulkan(int* err);
 void UnloadVulkan(Vulkan** vulkan);

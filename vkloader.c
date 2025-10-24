@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <dlfcn.h>
 #include <stdio.h>
+#include <limits.h>
 #include <string.h>
 #include <vulkan/vulkan_core.h>
 
@@ -200,6 +201,48 @@ static int ConfigureVulkanDevice(Vulkan* vulkan) {
     return SUCCESS;
 }
 
+static void ChooseMemoryAllocationStrategy(Vulkan* vulkan) {
+    VulkanContext* ctx = (VulkanContext*) vulkan->data;
+    
+    /* We need to find two distinct memory types, one with VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT 
+     * and one with VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT. That is, there are two distinct 
+     * memory regions, one that is device local and one that is device visible. These two
+     * flags should not be together, for indirect allocation. Otherwise, go ahead with
+     * direct allocation as most likely this is an integrated GPU or even a CPU and there
+     * is no point in allocating two separate buffers in the same kind of memory 
+     */
+    uint32_t deviceLocal = UINT_MAX, hostLocal = UINT_MAX;
+
+    for (uint32_t idx = 0; idx < ctx->mprops.memoryTypeCount; idx++) {
+        VkMemoryType mtype = ctx->mprops.memoryTypes[idx];
+        if ((mtype.propertyFlags & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT) && 
+            !(mtype.propertyFlags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)) {
+            deviceLocal = idx;
+        }
+        else if ((mtype.propertyFlags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT) &&
+            !(mtype.propertyFlags & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT)) {
+            hostLocal = idx;
+        }
+    }
+
+    if ((deviceLocal == UINT_MAX) || (hostLocal == UINT_MAX)) {
+        ctx->flags |= ALLOCATE_DIRECT;
+        for (uint32_t idx = 0; idx < ctx->mprops.memoryTypeCount; idx++) {
+            VkMemoryType mtype = ctx->mprops.memoryTypes[idx];
+            if ((mtype.propertyFlags & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT) && 
+                (mtype.propertyFlags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT))
+                    ctx->memoryHeaps = (0xFFFFU << 16) | (idx);
+        }
+
+        printf("%d\n", ctx->memoryHeaps & 0xFFFF);
+    }
+    else {
+        ctx->flags |= ALLOCATE_INDIRECT;
+        ctx->memoryHeaps = (deviceLocal << 16) | (hostLocal);
+        printf("%d %d\n", ctx->memoryHeaps >> 16, ctx->memoryHeaps & 0xFFFF);
+    }
+}
+
 int InitVulkan(Vulkan* vulkan) {
     VkGetInstanceProcAddr = GetFunction(vulkan, "vkGetInstanceProcAddr");
     VkCreateInstance = (PFN_vkCreateInstance) 
@@ -278,6 +321,12 @@ int InitVulkan(Vulkan* vulkan) {
     ret = ConfigureVulkanDevice(vulkan);
     if (ret)
         return ret;
+
+    ChooseMemoryAllocationStrategy(vulkan);
+
+    VkCreateBuffer = (PFN_vkCreateBuffer) VkGetInstanceProcAddr(ctx->instance, "vkCreateBuffer");
+    if (!VkCreateBuffer) 
+        return FAULTY_GPU_DRIVER;
 
     return SUCCESS;
 }

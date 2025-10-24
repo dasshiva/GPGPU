@@ -16,6 +16,7 @@ int main() {
 		return 1;
 	}
 
+	
 	DestroyVulkan(vulkan);
 	UnloadVulkan(&vulkan);
     return 0;

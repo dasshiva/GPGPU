@@ -2,6 +2,7 @@
 #define __PRIVATE_H__
 
 #include "defs.h"
+#include <stdint.h>
 #include <vulkan/vulkan_core.h>
 
 void* GetFunction(Vulkan* vulkan, const char* name);
@@ -21,6 +22,12 @@ PFN_vkCreateDevice VkCreateDevice;
 PFN_vkDestroyDevice VkDestroyDevice;
 
 PFN_vkGetPhysicalDeviceMemoryProperties VkGetPhysicalDeviceMemoryProperties;
+PFN_vkCreateBuffer VkCreateBuffer;
+
+enum Flags {
+    ALLOCATE_DIRECT = (1 << 0),
+    ALLOCATE_INDIRECT = (1 << 1)
+};
 
 typedef struct VulkanContext {
     VkInstance instance;
@@ -29,5 +36,14 @@ typedef struct VulkanContext {
     uint32_t selectedQueueFamily;
     VkQueue  queue;
     VkPhysicalDeviceMemoryProperties mprops;
+    uint32_t flags;
+    uint32_t memoryHeaps;
 } VulkanContext;
+
+typedef struct VulkanResource {
+    VkBuffer buffer;
+    uint64_t size;
+    VkDeviceMemory backingMemory;
+} VulkanResource; 
+
 #endif
