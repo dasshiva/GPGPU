@@ -328,6 +328,11 @@ int InitVulkan(Vulkan* vulkan) {
     if (!VkCreateBuffer) 
         return FAULTY_GPU_DRIVER;
 
+    VkGetBufferMemoryRequirements = (PFN_vkGetBufferMemoryRequirements) 
+        VkGetInstanceProcAddr(ctx->instance, "vkGetMemoryBufferRequirements");
+    if (!VkGetBufferMemoryRequirements)
+        return FAULTY_GPU_DRIVER;
+
     return SUCCESS;
 }
 

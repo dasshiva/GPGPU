@@ -38,6 +38,10 @@ Resource CreateResource(Vulkan* vulkan, void* data, uint64_t size, int* err) {
         }
 
         VkMemoryRequirements memReqs;
+        VkGetBufferMemoryRequirements(ctx->logicalDevice, resource->buffer, &memReqs);
+        resource->size = memReqs.size;
+
+        
         
         resource->size = size;
         

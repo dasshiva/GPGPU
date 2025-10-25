@@ -23,6 +23,11 @@ PFN_vkDestroyDevice VkDestroyDevice;
 
 PFN_vkGetPhysicalDeviceMemoryProperties VkGetPhysicalDeviceMemoryProperties;
 PFN_vkCreateBuffer VkCreateBuffer;
+PFN_vkGetBufferMemoryRequirements VkGetBufferMemoryRequirements;
+PFN_vkAllocateMemory VkAllocateMemory;
+PFN_vkMapMemory VkMapMemory; 
+PFN_vkUnmapMemory VkUnmapMemory;
+PFN_vkBindBufferMemory VkBindBufferMemory;
 
 enum Flags {
     ALLOCATE_DIRECT = (1 << 0),
