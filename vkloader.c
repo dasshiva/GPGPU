@@ -9,6 +9,31 @@
 #include "include/alloc.h"
 #include "include/private.h"
 
+PFN_vkGetInstanceProcAddr VkGetInstanceProcAddr;
+PFN_vkCreateInstance VkCreateInstance;
+PFN_vkEnumerateInstanceLayerProperties VkEnumerateInstanceLayerProperties;
+PFN_vkEnumerateInstanceExtensionProperties VkEnumerateInstanceExtensionProperties;
+PFN_vkEnumerateInstanceVersion VkEnumerateInstanceVersion;
+PFN_vkDestroyInstance VkDestroyInstance;
+
+PFN_vkEnumeratePhysicalDevices VkEnumeratePhysicalDevices;
+PFN_vkGetPhysicalDeviceProperties VkGetPhysicalDeviceProperties;
+PFN_vkGetPhysicalDeviceQueueFamilyProperties VkGetPhysicalDeviceQueueFamilyProperties;
+PFN_vkGetDeviceQueue VkGetDeviceQueue;
+PFN_vkCreateDevice VkCreateDevice;
+PFN_vkDestroyDevice VkDestroyDevice;
+
+PFN_vkGetPhysicalDeviceMemoryProperties VkGetPhysicalDeviceMemoryProperties;
+PFN_vkCreateBuffer VkCreateBuffer;
+PFN_vkGetBufferMemoryRequirements VkGetBufferMemoryRequirements;
+PFN_vkAllocateMemory VkAllocateMemory;
+PFN_vkMapMemory VkMapMemory; 
+PFN_vkUnmapMemory VkUnmapMemory;
+PFN_vkBindBufferMemory VkBindBufferMemory;
+PFN_vkFlushMappedMemoryRanges VkFlushMappedMemoryRanges;
+PFN_vkDestroyBuffer VkDestroyBuffer;
+PFN_vkFreeMemory VkFreeMemory;
+
 Vulkan* LoadVulkan(int* err) {
 	char* driver = getenv("VULKAN_DRIVER");
     if (!driver) 
@@ -329,8 +354,40 @@ int InitVulkan(Vulkan* vulkan) {
         return FAULTY_GPU_DRIVER;
 
     VkGetBufferMemoryRequirements = (PFN_vkGetBufferMemoryRequirements) 
-        VkGetInstanceProcAddr(ctx->instance, "vkGetMemoryBufferRequirements");
+        VkGetInstanceProcAddr(ctx->instance, "vkGetBufferMemoryRequirements");
     if (!VkGetBufferMemoryRequirements)
+        return FAULTY_GPU_DRIVER;
+
+    VkAllocateMemory = (PFN_vkAllocateMemory) 
+        VkGetInstanceProcAddr(ctx->instance, "vkAllocateMemory");
+    if (!VkAllocateMemory)
+        return FAULTY_GPU_DRIVER;
+
+    
+    VkMapMemory = (PFN_vkMapMemory) VkGetInstanceProcAddr(ctx->instance, "vkMapMemory");
+    if (!VkMapMemory)
+        return FAULTY_GPU_DRIVER;
+    
+    VkUnmapMemory = (PFN_vkUnmapMemory) VkGetInstanceProcAddr(ctx->instance, "vkUnmapMemory");
+    if (!VkUnmapMemory)
+        return FAULTY_GPU_DRIVER;
+
+    VkBindBufferMemory = (PFN_vkBindBufferMemory)
+        VkGetInstanceProcAddr(ctx->instance, "vkBindBufferMemory");
+    if (!VkBindBufferMemory)
+        return FAULTY_GPU_DRIVER;
+
+    VkFlushMappedMemoryRanges = (PFN_vkFlushMappedMemoryRanges) 
+        VkGetInstanceProcAddr(ctx->instance, "vkFlushMappedMemoryRanges");
+    if (!VkFlushMappedMemoryRanges)
+        return FAULTY_GPU_DRIVER;
+
+    VkDestroyBuffer = (PFN_vkDestroyBuffer) VkGetInstanceProcAddr(ctx->instance, "vkDestroyBuffer");
+    if (!VkDestroyBuffer)
+        return FAULTY_GPU_DRIVER;
+
+    VkFreeMemory = (PFN_vkFreeMemory) VkGetInstanceProcAddr(ctx->instance, "vkFreeMemory");
+    if (!VkFreeMemory)
         return FAULTY_GPU_DRIVER;
 
     return SUCCESS;

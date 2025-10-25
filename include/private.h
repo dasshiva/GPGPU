@@ -7,27 +7,30 @@
 
 void* GetFunction(Vulkan* vulkan, const char* name);
 
-PFN_vkGetInstanceProcAddr VkGetInstanceProcAddr;
-PFN_vkCreateInstance VkCreateInstance;
-PFN_vkEnumerateInstanceLayerProperties VkEnumerateInstanceLayerProperties;
-PFN_vkEnumerateInstanceExtensionProperties VkEnumerateInstanceExtensionProperties;
-PFN_vkEnumerateInstanceVersion VkEnumerateInstanceVersion;
-PFN_vkDestroyInstance VkDestroyInstance;
+extern PFN_vkGetInstanceProcAddr VkGetInstanceProcAddr;
+extern PFN_vkCreateInstance VkCreateInstance;
+extern PFN_vkEnumerateInstanceLayerProperties VkEnumerateInstanceLayerProperties;
+extern PFN_vkEnumerateInstanceExtensionProperties VkEnumerateInstanceExtensionProperties;
+extern PFN_vkEnumerateInstanceVersion VkEnumerateInstanceVersion;
+extern PFN_vkDestroyInstance VkDestroyInstance;
 
-PFN_vkEnumeratePhysicalDevices VkEnumeratePhysicalDevices;
-PFN_vkGetPhysicalDeviceProperties VkGetPhysicalDeviceProperties;
-PFN_vkGetPhysicalDeviceQueueFamilyProperties VkGetPhysicalDeviceQueueFamilyProperties;
-PFN_vkGetDeviceQueue VkGetDeviceQueue;
-PFN_vkCreateDevice VkCreateDevice;
-PFN_vkDestroyDevice VkDestroyDevice;
+extern PFN_vkEnumeratePhysicalDevices VkEnumeratePhysicalDevices;
+extern PFN_vkGetPhysicalDeviceProperties VkGetPhysicalDeviceProperties;
+extern PFN_vkGetPhysicalDeviceQueueFamilyProperties VkGetPhysicalDeviceQueueFamilyProperties;
+extern PFN_vkGetDeviceQueue VkGetDeviceQueue;
+extern PFN_vkCreateDevice VkCreateDevice;
+extern PFN_vkDestroyDevice VkDestroyDevice;
 
-PFN_vkGetPhysicalDeviceMemoryProperties VkGetPhysicalDeviceMemoryProperties;
-PFN_vkCreateBuffer VkCreateBuffer;
-PFN_vkGetBufferMemoryRequirements VkGetBufferMemoryRequirements;
-PFN_vkAllocateMemory VkAllocateMemory;
-PFN_vkMapMemory VkMapMemory; 
-PFN_vkUnmapMemory VkUnmapMemory;
-PFN_vkBindBufferMemory VkBindBufferMemory;
+extern PFN_vkGetPhysicalDeviceMemoryProperties VkGetPhysicalDeviceMemoryProperties;
+extern PFN_vkCreateBuffer VkCreateBuffer;
+extern PFN_vkGetBufferMemoryRequirements VkGetBufferMemoryRequirements;
+extern PFN_vkAllocateMemory VkAllocateMemory;
+extern PFN_vkMapMemory VkMapMemory; 
+extern PFN_vkUnmapMemory VkUnmapMemory;
+extern PFN_vkBindBufferMemory VkBindBufferMemory;
+extern PFN_vkFlushMappedMemoryRanges VkFlushMappedMemoryRanges;
+extern PFN_vkDestroyBuffer VkDestroyBuffer;
+extern PFN_vkFreeMemory VkFreeMemory;
 
 enum Flags {
     ALLOCATE_DIRECT = (1 << 0),
