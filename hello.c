@@ -23,9 +23,14 @@ int main() {
 		return 1;
 	}
 
-	FreeResource(vulkan, res);
+	Resource inputs[] = {res, NULL};
 
+	Job job = CreateJob(vulkan, inputs, &err);
+	DestroyJob(vulkan, job);
+
+	FreeResource(vulkan, res);
 	DestroyVulkan(vulkan);
 	UnloadVulkan(&vulkan);
+	
     return 0;
 }

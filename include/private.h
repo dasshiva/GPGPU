@@ -31,6 +31,16 @@ extern PFN_vkBindBufferMemory VkBindBufferMemory;
 extern PFN_vkFlushMappedMemoryRanges VkFlushMappedMemoryRanges;
 extern PFN_vkDestroyBuffer VkDestroyBuffer;
 extern PFN_vkFreeMemory VkFreeMemory;
+extern PFN_vkCreateDescriptorPool VkCreateDescriptorPool;
+extern PFN_vkCreateDescriptorSetLayout VkCreateDescriptorSetLayout;
+extern PFN_vkAllocateDescriptorSets VkAllocateDescriptorSets;
+extern PFN_vkUpdateDescriptorSets VkUpdateDescriptorSets;
+extern PFN_vkCreatePipelineLayout VkCreatePipelineLayout;
+
+extern PFN_vkGetDeviceQueue VkGetDeviceQueue;
+extern PFN_vkCreateCommandPool VkCreateCommandPool;
+extern PFN_vkDestroyCommandPool VkDestroyCommandPool;
+
 
 enum Flags {
     ALLOCATE_DIRECT = (1 << 0),
@@ -53,5 +63,11 @@ typedef struct VulkanResource {
     uint64_t size;
     VkDeviceMemory backingMemory;
 } VulkanResource; 
+
+typedef struct VulkanJob {
+    VkPipeline pipeline;
+    VkQueue queue;
+    VkCommandPool cpool;
+} VulkanJob;
 
 #endif

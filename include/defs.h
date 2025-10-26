@@ -27,6 +27,10 @@ typedef Handle Resource;
 Resource CreateResource(Vulkan* vulkan, void* data, uint64_t size, int* err);
 void FreeResource(Vulkan* vulkan, Resource resource);
 
+typedef Handle Job;
+Job CreateJob(Vulkan* vulkan, Resource* inputs, int* err);
+void DestroyJob(Vulkan* vulkan, Job job);
+
 Vulkan* LoadVulkan(int* err);
 void UnloadVulkan(Vulkan** vulkan);
 

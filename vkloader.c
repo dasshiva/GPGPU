@@ -33,6 +33,15 @@ PFN_vkBindBufferMemory VkBindBufferMemory;
 PFN_vkFlushMappedMemoryRanges VkFlushMappedMemoryRanges;
 PFN_vkDestroyBuffer VkDestroyBuffer;
 PFN_vkFreeMemory VkFreeMemory;
+PFN_vkCreateDescriptorPool VkCreateDescriptorPool;
+PFN_vkCreateDescriptorSetLayout VkCreateDescriptorSetLayout;
+PFN_vkAllocateDescriptorSets VkAllocateDescriptorSets;
+PFN_vkUpdateDescriptorSets VkUpdateDescriptorSets;
+PFN_vkCreatePipelineLayout VkCreatePipelineLayout;
+
+PFN_vkGetDeviceQueue VkGetDeviceQueue;
+PFN_vkCreateCommandPool VkCreateCommandPool;
+PFN_vkDestroyCommandPool VkDestroyCommandPool;
 
 Vulkan* LoadVulkan(int* err) {
 	char* driver = getenv("VULKAN_DRIVER");
@@ -390,6 +399,46 @@ int InitVulkan(Vulkan* vulkan) {
     if (!VkFreeMemory)
         return FAULTY_GPU_DRIVER;
 
+    VkCreateDescriptorPool =  (PFN_vkCreateDescriptorPool)
+        VkGetInstanceProcAddr(ctx->instance, "vkCreateDescriptorPool");
+    if (!VkCreateDescriptorPool)
+        return FAULTY_GPU_DRIVER;
+
+    VkCreateDescriptorSetLayout = (PFN_vkCreateDescriptorSetLayout)
+        VkGetInstanceProcAddr(ctx->instance, "vkCreateDescriptorSetLayout");
+    if (!VkCreateDescriptorSetLayout)
+        return FAULTY_GPU_DRIVER;
+
+    VkAllocateDescriptorSets = (PFN_vkAllocateDescriptorSets)
+        VkGetInstanceProcAddr(ctx->instance, "vkAllocateDescriptorSets");
+    if (!VkAllocateDescriptorSets)
+        return FAULTY_GPU_DRIVER;
+
+    VkUpdateDescriptorSets =  (PFN_vkUpdateDescriptorSets)
+        VkGetInstanceProcAddr(ctx->instance, "vkUpdateDescriptorSets");
+    if (!VkUpdateDescriptorSets)
+        return FAULTY_GPU_DRIVER;
+
+    VkCreatePipelineLayout = (PFN_vkCreatePipelineLayout)
+        VkGetInstanceProcAddr(ctx->instance, "vkCreatePipelineLayout");
+    if (!VkCreatePipelineLayout)
+        return FAULTY_GPU_DRIVER;
+
+    VkGetDeviceQueue = (PFN_vkGetDeviceQueue)
+        VkGetInstanceProcAddr(ctx->instance, "vkGetDeviceQueue");
+    if (!VkGetDeviceQueue)
+        return FAULTY_GPU_DRIVER;
+
+    VkCreateCommandPool = (PFN_vkCreateCommandPool)
+        VkGetInstanceProcAddr(ctx->instance, "vkCreateCommandPool");
+    if (!VkCreateCommandPool)
+        return FAULTY_GPU_DRIVER;
+
+    VkDestroyCommandPool = (PFN_vkDestroyCommandPool)
+        VkGetInstanceProcAddr(ctx->instance, "vkDestroyCommandPool");
+    if (!VkDestroyCommandPool)
+        return FAULTY_GPU_DRIVER;
+    
     return SUCCESS;
 }
 
