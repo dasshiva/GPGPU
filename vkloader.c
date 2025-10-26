@@ -304,11 +304,11 @@ int InitVulkan(Vulkan* vulkan) {
 
     uint32_t layers = 0;
     VkEnumerateInstanceLayerProperties(&layers, NULL);
-    VkLayerProperties* lprops = Alloc(layers * sizeof(VkLayerProperties));
-    const char* validation = "VK_LAYER_KHRONOS_validation";
+	const char* validation = "VK_LAYER_KHRONOS_validation";
     int enable_layers = 0;
 
     if (layers) {
+		VkLayerProperties* lprops = Alloc(layers * sizeof(VkLayerProperties));
         VkEnumerateInstanceLayerProperties(&layers, lprops);
         for (int i = 0; i < layers; i++) {
             printf("Layer %s - %s\n", lprops[i].layerName, lprops[i].description);
