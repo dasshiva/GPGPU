@@ -29,6 +29,7 @@ void FreeResource(Vulkan* vulkan, Resource resource);
 
 typedef Handle Job;
 Job CreateJob(Vulkan* vulkan, Resource* inputs, int* err);
+int SubmitJob(Vulkan* vulkan, Job job, Resource* inputs);
 void DestroyJob(Vulkan* vulkan, Job job);
 
 Vulkan* LoadVulkan(int* err);

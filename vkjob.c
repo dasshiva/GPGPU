@@ -3,6 +3,7 @@
 #include "include/private.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <vulkan/vulkan_core.h>
 
 
@@ -135,11 +136,141 @@ Job CreateJob(Vulkan* vulkan, Resource* inputs, int* err) {
         return NULL;
     }
 
+    vjob->descPool = pool;
+    vjob->descSet = descSet;
+    vjob->descSetLayout = descSetLayout;
+    vjob->pipelineLayout = pipelineLayout;
+
+    FILE* file = fopen("shader.spv", "rb");
+    void* shader = Alloc(10000 * sizeof(uint8_t));
+    int size = fread(shader, 1, 10000, file);
+
+    VkShaderModule module;
+    VkShaderModuleCreateInfo shaderModuleCreateInfo = {
+        .sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
+        .pNext = NULL,
+        .flags = 0,
+        .codeSize = size,
+        .pCode = shader
+    };
+    
+    VkCreateShaderModule(ctx->logicalDevice, &shaderModuleCreateInfo, NULL, &module);
+
+    VkPipelineShaderStageCreateInfo shaderCreateInfo = {
+        .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+        .pNext = NULL,
+        .flags = 0,
+        .stage = VK_SHADER_STAGE_COMPUTE_BIT,
+        .module = module,
+        .pName = "main",
+        .pSpecializationInfo = NULL
+    };
+
+    VkComputePipelineCreateInfo pipelineCreateInfo = {
+        .sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
+        .pNext = NULL,
+        .flags = 0,
+        .stage = shaderCreateInfo,
+        .layout = pipelineLayout,
+        .basePipelineHandle = VK_NULL_HANDLE,
+        .basePipelineIndex = -1
+    };
+
+    if (VkCreateComputePipelines(ctx->logicalDevice, VK_NULL_HANDLE, 1, 
+        &pipelineCreateInfo, NULL, &vjob->pipeline) != VK_SUCCESS) {
+        *err = FAULTY_GPU_DRIVER;
+        return NULL;
+    }
+
+    vjob->shader = module;
     return ret;
+}
+
+int SubmitJob(Vulkan* vulkan, Job job, Resource* inputs) {
+    VulkanJob* vjob = job;
+    VulkanContext* ctx = vulkan->data;
+
+    VkCommandBufferAllocateInfo commandBuffer = {
+        .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
+        .pNext = NULL,
+        .commandPool = vjob->cpool,
+        .level = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
+        .commandBufferCount = 1
+    };
+
+    VkCommandBuffer cmdBuffer;
+    if (VkAllocateCommandBuffers(ctx->logicalDevice, &commandBuffer, &cmdBuffer) 
+            != VK_SUCCESS) {
+        return OUT_OF_MEMORY;
+    }
+
+    VkFence fence;
+    VkFenceCreateInfo fenceCreateInfo = {
+        .sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
+        .pNext = NULL,
+        .flags = 0
+    };
+
+    if (VkCreateFence(ctx->logicalDevice, &fenceCreateInfo, NULL, &fence) != VK_SUCCESS) 
+        return UNKNOWN_ERROR;
+
+    VkCommandBufferBeginInfo cmdBufferBeginInfo = {
+        .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
+        .pNext = NULL,
+        .flags = 0,
+        .pInheritanceInfo = NULL
+    };
+
+    if (VkBeginCommandBuffer(cmdBuffer, &cmdBufferBeginInfo) != VK_SUCCESS) 
+        return UNKNOWN_ERROR;
+
+    VkCmdBindPipeline(cmdBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, vjob->pipeline);
+    VkCmdBindDescriptorSets(cmdBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, 
+        vjob->pipelineLayout, 0, 1, &vjob->descSet, 0, 0);
+    VkCmdDispatch(cmdBuffer, 8, 1, 1);
+    VkEndCommandBuffer(cmdBuffer);
+
+    VkSubmitInfo submitInfo = {
+        .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
+        .pNext = NULL,
+        .waitSemaphoreCount = 0,
+        .pWaitSemaphores = NULL,
+        .pWaitDstStageMask = NULL,
+        .commandBufferCount = 1,
+        .pCommandBuffers = &cmdBuffer,
+        .signalSemaphoreCount = 0,
+        .pSignalSemaphores = NULL
+    };
+
+    if (VkQueueSubmit(ctx->queue, 1, &submitInfo, fence) != VK_SUCCESS)
+        return FAULTY_GPU_DRIVER;
+
+    VkWaitForFences(ctx->logicalDevice, 1, &fence, VK_TRUE, UINT64_MAX);
+    VkQueueWaitIdle(ctx->queue);
+
+    VulkanResource* res = inputs[0];
+    void* out;
+    VkMapMemory(ctx->logicalDevice, res->backingMemory, 0, VK_WHOLE_SIZE, 0, &out);
+
+    int* output = out;
+    printf("Output: ");
+    for (int i = 0; i < 8; i++) {
+        printf("%d ", output[i]);
+    }
+
+    VkUnmapMemory(ctx->logicalDevice, res->backingMemory);
+    VkDestroyFence(ctx->logicalDevice, fence, NULL);
+    
+    return SUCCESS;
 }
 
 void DestroyJob(Vulkan* vulkan, Job job) {
     VulkanJob* vjob = job;
     VulkanContext* ctx = vulkan->data;
     VkDestroyCommandPool(ctx->logicalDevice, vjob->cpool, NULL);
+    VkDestroyPipelineLayout(ctx->logicalDevice, vjob->pipelineLayout, NULL);
+    VkDestroyDescriptorPool(ctx->logicalDevice, vjob->descPool, NULL);
+    VkDestroyDescriptorSetLayout(ctx->logicalDevice, vjob->descSetLayout, NULL);
+    VkDestroyPipeline(ctx->logicalDevice, vjob->pipeline, NULL);
+    VkDestroyShaderModule(ctx->logicalDevice, vjob->shader, NULL);
 }

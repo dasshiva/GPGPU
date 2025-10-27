@@ -17,7 +17,7 @@ int main() {
 	}
 
 	int memory[] = {1, 2, 3, 4, 5, 6, 7, 8};
-	Resource res = CreateResource(vulkan, memory, 24, &ret);
+	Resource res = CreateResource(vulkan, memory, 32, &ret);
 	if (ret) {
 		printf("Could not allocate resource on GPU = %d\n", ret);
 		return 1;
@@ -26,11 +26,16 @@ int main() {
 	Resource inputs[] = {res, NULL};
 
 	Job job = CreateJob(vulkan, inputs, &err);
+	if (SubmitJob(vulkan, job, inputs) != SUCCESS) {
+		printf("Compute Work failed\n");
+		return 0;
+	}
+	
 	DestroyJob(vulkan, job);
 
 	FreeResource(vulkan, res);
 	DestroyVulkan(vulkan);
 	UnloadVulkan(&vulkan);
-	
+
     return 0;
 }

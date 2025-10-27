@@ -40,7 +40,27 @@ extern PFN_vkCreatePipelineLayout VkCreatePipelineLayout;
 extern PFN_vkGetDeviceQueue VkGetDeviceQueue;
 extern PFN_vkCreateCommandPool VkCreateCommandPool;
 extern PFN_vkDestroyCommandPool VkDestroyCommandPool;
+extern PFN_vkDestroyPipelineLayout VkDestroyPipelineLayout;
+extern PFN_vkDestroyDescriptorSetLayout VkDestroyDescriptorSetLayout;
+extern PFN_vkDestroyDescriptorPool VkDestroyDescriptorPool;
 
+extern PFN_vkCreateShaderModule VkCreateShaderModule;
+extern PFN_vkCreateComputePipelines VkCreateComputePipelines;
+extern PFN_vkDestroyPipeline VkDestroyPipeline;
+extern PFN_vkDestroyShaderModule VkDestroyShaderModule;
+
+extern PFN_vkAllocateCommandBuffers VkAllocateCommandBuffers;
+extern PFN_vkCreateFence VkCreateFence;
+
+extern PFN_vkBeginCommandBuffer VkBeginCommandBuffer;
+extern PFN_vkEndCommandBuffer VkEndCommandBuffer;
+extern PFN_vkCmdBindPipeline VkCmdBindPipeline;
+extern PFN_vkCmdBindDescriptorSets VkCmdBindDescriptorSets;
+extern PFN_vkCmdDispatch VkCmdDispatch;
+extern PFN_vkQueueSubmit VkQueueSubmit;
+extern PFN_vkWaitForFences VkWaitForFences;
+extern PFN_vkQueueWaitIdle VkQueueWaitIdle;
+extern PFN_vkDestroyFence VkDestroyFence;
 
 enum Flags {
     ALLOCATE_DIRECT = (1 << 0),
@@ -65,9 +85,14 @@ typedef struct VulkanResource {
 } VulkanResource; 
 
 typedef struct VulkanJob {
+    VkPipelineLayout pipelineLayout;
+    VkDescriptorSetLayout descSetLayout;
+    VkDescriptorSet descSet;
+    VkDescriptorPool descPool;
     VkPipeline pipeline;
     VkQueue queue;
     VkCommandPool cpool;
+    VkShaderModule shader;
 } VulkanJob;
 
 #endif
