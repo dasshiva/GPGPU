@@ -1,3 +1,5 @@
 blue
 a.out
 **.swp
+include/generated/**
+imports-gen
