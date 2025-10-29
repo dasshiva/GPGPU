@@ -65,15 +65,17 @@ void DestroyVulkan(Vulkan* vulkan) {
     vkDestroyInstance(ctx->instance, NULL);
 }
 
-static int DeviceScore(VkPhysicalDeviceProperties* prop) {
-    int score = 0;
+static uint32_t DeviceScore(VkPhysicalDeviceProperties* prop) {
+    uint32_t score = 0;
     switch (prop->deviceType) {
-        case VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU: score += 300; break;
-        case VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU: score += 500; break;
-        case VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU: score += 75; break;
-        case VK_PHYSICAL_DEVICE_TYPE_CPU: score += 25; break;
-        default: score += 0;
+        case VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU: score += 3000; break;
+        case VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU: score += 5000; break;
+        case VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU: score += 1000; break;
+        default: {}
     }
+
+    if (prop->deviceType >= 1 && prop->deviceType < 4)
+        return UINT_MAX;
 
     VkPhysicalDeviceLimits limits = prop->limits;
 
@@ -116,6 +118,8 @@ static int ConfigureVulkanDevice(Vulkan* vulkan) {
         uint32_t devScore = DeviceScore(&devProps);
         if (devScore > score) {
             selectedDevice = i;
+            printf("Picked Device = %s score = %d Highest score = %d\n", devProps.deviceName, devScore, score);
+            score = devScore;
             memcpy(&selectedDeviceProps, &devProps, sizeof(VkPhysicalDeviceProperties));
         }
     }
@@ -213,20 +217,24 @@ static void ChooseMemoryAllocationStrategy(Vulkan* vulkan) {
         }
     }
 
-    if ((deviceLocal == UINT_MAX) || (hostLocal == UINT_MAX)) {
+    // if ((deviceLocal == UINT_MAX) || (hostLocal == UINT_MAX)) {
         ctx->flags |= ALLOCATE_DIRECT;
         for (uint32_t idx = 0; idx < ctx->mprops.memoryTypeCount; idx++) {
             VkMemoryType mtype = ctx->mprops.memoryTypes[idx];
             if ((mtype.propertyFlags & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT) && 
-                (mtype.propertyFlags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT))
+                (mtype.propertyFlags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT) &&
+                (mtype.propertyFlags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT)) {
                     ctx->memoryHeaps = (0xFFFFU << 16) | (idx);
+                    break;
+            }
         }
 
-    }
-    else {
+    // }
+    /*{
         ctx->flags |= ALLOCATE_INDIRECT;
         ctx->memoryHeaps = (deviceLocal << 16) | (hostLocal);
-    }
+        printf("%d %d\n", deviceLocal, hostLocal);
+    }*/
 }
 
 int InitVulkan(Vulkan* vulkan) {
