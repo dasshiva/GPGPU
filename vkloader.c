@@ -113,7 +113,6 @@ static int ConfigureVulkanDevice(Vulkan* vulkan) {
     for (uint32_t i = 0; i < devices; i++) {
         VkPhysicalDeviceProperties devProps;
         vkGetPhysicalDeviceProperties(physDevices[i], &devProps);
-        printf("Device detected: %s\n", devProps.deviceName);
         uint32_t devScore = DeviceScore(&devProps);
         if (devScore > score) {
             selectedDevice = i;
@@ -122,6 +121,17 @@ static int ConfigureVulkanDevice(Vulkan* vulkan) {
     }
 
     ctx->physicalDevice = physDevices[selectedDevice];
+
+    uint32_t extensions = 0;
+    vkEnumerateDeviceExtensionProperties(ctx->physicalDevice, NULL, &extensions, NULL);
+    if (extensions) {
+        VkExtensionProperties* extProps = Alloc(sizeof(VkExtensionProperties) * extensions);
+        vkEnumerateDeviceExtensionProperties(ctx->physicalDevice, NULL, &extensions, extProps);
+        for (uint32_t i = 0; i < extensions; i++) {
+            VkExtensionProperties eprop = extProps[i];
+            printf("Extension %s - Version %d\n", eprop.extensionName, eprop.specVersion);
+        }
+    }
 
     uint32_t qfcnt = 0;
 

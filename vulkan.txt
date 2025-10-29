@@ -40,3 +40,4 @@ vkQueueSubmit
 vkWaitForFences
 vkQueueWaitIdle
 vkDestroyFence
+vkEnumerateDeviceExtensionProperties
