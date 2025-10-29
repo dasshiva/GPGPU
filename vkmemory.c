@@ -83,6 +83,7 @@ Resource CreateResource(Vulkan* vulkan, void* data, uint64_t size, int* err) {
 
     } else {
         // TODO: Implement Indirect GPU allocation
+        *err = UNIMPLEMENTED;
         return NULL;
     }
 

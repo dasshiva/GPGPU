@@ -18,7 +18,7 @@ int main() {
 
 	int memory[] = {1, 2, 3, 4, 5, 6, 7, 8};
 	Resource res = CreateResource(vulkan, memory, 32, &ret);
-	if (ret) {
+	if (!res) {
 		printf("Could not allocate resource on GPU = %d\n", ret);
 		return 1;
 	}

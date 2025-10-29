@@ -11,7 +11,8 @@ enum Error {
     NO_QUEUE_AVAILABLE,
     UNKNOWN_ERROR,
     OUT_OF_MEMORY,
-    OUT_OF_GPU_MEMORY
+    OUT_OF_GPU_MEMORY,
+    UNIMPLEMENTED
 };
 
 typedef void* Handle;
