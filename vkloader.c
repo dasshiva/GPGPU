@@ -256,11 +256,14 @@ int InitVulkan(Vulkan* vulkan) {
     uint32_t exts = 0;
     vkEnumerateInstanceExtensionProperties(NULL, &exts, NULL);
     if (exts) {
-        printf("Instance Extensions \n");
-        instanceExtensions = Alloc(exts * sizeof(VkExtensionProperties));
-        vkEnumerateInstanceExtensionProperties(NULL, &exts, instanceExtensions);
-        for (uint32_t i = 0; i < exts; i++) {
-            printf("Extension %s - Version %d\n", instanceExtensions[i].extensionName, instanceExtensions[i].specVersion);
+        char* p = getenv("VERBOSE");
+        if (p) {
+            printf("Instance Extensions \n");
+            instanceExtensions = Alloc(exts * sizeof(VkExtensionProperties));
+            vkEnumerateInstanceExtensionProperties(NULL, &exts, instanceExtensions);
+            for (uint32_t i = 0; i < exts; i++) {
+                printf("Extension %s - Version %d\n", instanceExtensions[i].extensionName, instanceExtensions[i].specVersion);
+            }
         }
     }
 
