@@ -284,6 +284,7 @@ int InitVulkan(Vulkan* vulkan) {
 		VkLayerProperties* lprops = Alloc(layers * sizeof(VkLayerProperties));
         vkEnumerateInstanceLayerProperties(&layers, lprops);
         for (int i = 0; i < layers; i++) {
+			printf("Layer: %s\n", lprops[i].layerName);
             if (strcmp(validation, lprops[i].layerName) == 0) {
                 enable_layers = 1;
             }
