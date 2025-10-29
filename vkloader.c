@@ -99,6 +99,7 @@ static uint32_t DeviceScore(VkPhysicalDeviceProperties* prop) {
 
 static int ConfigureVulkanDevice(Vulkan* vulkan) {
     VulkanContext* ctx = vulkan->data;
+    char* p = getenv("VERBOSE");
 
     uint32_t devices = 0;
     vkEnumeratePhysicalDevices(ctx->instance, &devices, NULL);
@@ -118,7 +119,7 @@ static int ConfigureVulkanDevice(Vulkan* vulkan) {
         uint32_t devScore = DeviceScore(&devProps);
         if (devScore > score) {
             selectedDevice = i;
-            printf("Picked Device = %s score = %d Highest score = %d\n", devProps.deviceName, devScore, score);
+            printf("Picked Device = %s\n", devProps.deviceName);
             score = devScore;
             memcpy(&selectedDeviceProps, &devProps, sizeof(VkPhysicalDeviceProperties));
         }
@@ -129,12 +130,14 @@ static int ConfigureVulkanDevice(Vulkan* vulkan) {
     uint32_t extensions = 0;
     vkEnumerateDeviceExtensionProperties(ctx->physicalDevice, NULL, &extensions, NULL);
     if (extensions) {
-        printf("Device Extensions \n");
-        VkExtensionProperties* extProps = Alloc(sizeof(VkExtensionProperties) * extensions);
-        vkEnumerateDeviceExtensionProperties(ctx->physicalDevice, NULL, &extensions, extProps);
-        for (uint32_t i = 0; i < extensions; i++) {
-            VkExtensionProperties eprop = extProps[i];
-            printf("Extension %s - Version %d\n", eprop.extensionName, eprop.specVersion);
+        if (p) {
+            printf("Device Extensions \n");
+            VkExtensionProperties* extProps = Alloc(sizeof(VkExtensionProperties) * extensions);
+            vkEnumerateDeviceExtensionProperties(ctx->physicalDevice, NULL, &extensions, extProps);
+            for (uint32_t i = 0; i < extensions; i++) {
+                VkExtensionProperties eprop = extProps[i];
+                printf("Extension %s - Version %d\n", eprop.extensionName, eprop.specVersion);
+            }
         }
     }
 
@@ -238,6 +241,7 @@ static void ChooseMemoryAllocationStrategy(Vulkan* vulkan) {
 }
 
 int InitVulkan(Vulkan* vulkan) {
+    char* p = getenv("VERBOSE");
     vkGetInstanceProcAddr = GetFunction(vulkan, "vkGetInstanceProcAddr");
     vkCreateInstance = (PFN_vkCreateInstance) vkGetInstanceProcAddr(NULL, "vkCreateInstance");
     if (!vkCreateInstance)
@@ -256,7 +260,7 @@ int InitVulkan(Vulkan* vulkan) {
     uint32_t exts = 0;
     vkEnumerateInstanceExtensionProperties(NULL, &exts, NULL);
     if (exts) {
-        char* p = getenv("VERBOSE");
+        
         if (p) {
             printf("Instance Extensions \n");
             instanceExtensions = Alloc(exts * sizeof(VkExtensionProperties));
@@ -283,8 +287,11 @@ int InitVulkan(Vulkan* vulkan) {
     if (layers) {
 		VkLayerProperties* lprops = Alloc(layers * sizeof(VkLayerProperties));
         vkEnumerateInstanceLayerProperties(&layers, lprops);
+        
         for (int i = 0; i < layers; i++) {
-			printf("Layer: %s\n", lprops[i].layerName);
+            if (p)
+			    printf("Layer: %s\n", lprops[i].layerName);
+
             if (strcmp(validation, lprops[i].layerName) == 0) {
                 enable_layers = 1;
             }
