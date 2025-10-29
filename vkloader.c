@@ -3,67 +3,16 @@
 #include <stdio.h>
 #include <limits.h>
 #include <string.h>
-#include <vulkan/vulkan_core.h>
 
 #include "include/defs.h"
 #include "include/alloc.h"
 #include "include/private.h"
 
-PFN_vkGetInstanceProcAddr VkGetInstanceProcAddr;
-PFN_vkCreateInstance VkCreateInstance;
-PFN_vkEnumerateInstanceLayerProperties VkEnumerateInstanceLayerProperties;
-PFN_vkEnumerateInstanceExtensionProperties VkEnumerateInstanceExtensionProperties;
-PFN_vkEnumerateInstanceVersion VkEnumerateInstanceVersion;
-PFN_vkDestroyInstance VkDestroyInstance;
-
-PFN_vkEnumeratePhysicalDevices VkEnumeratePhysicalDevices;
-PFN_vkGetPhysicalDeviceProperties VkGetPhysicalDeviceProperties;
-PFN_vkGetPhysicalDeviceQueueFamilyProperties VkGetPhysicalDeviceQueueFamilyProperties;
-PFN_vkGetDeviceQueue VkGetDeviceQueue;
-PFN_vkCreateDevice VkCreateDevice;
-PFN_vkDestroyDevice VkDestroyDevice;
-
-PFN_vkGetPhysicalDeviceMemoryProperties VkGetPhysicalDeviceMemoryProperties;
-PFN_vkCreateBuffer VkCreateBuffer;
-PFN_vkGetBufferMemoryRequirements VkGetBufferMemoryRequirements;
-PFN_vkAllocateMemory VkAllocateMemory;
-PFN_vkMapMemory VkMapMemory; 
-PFN_vkUnmapMemory VkUnmapMemory;
-PFN_vkBindBufferMemory VkBindBufferMemory;
-PFN_vkFlushMappedMemoryRanges VkFlushMappedMemoryRanges;
-PFN_vkDestroyBuffer VkDestroyBuffer;
-PFN_vkFreeMemory VkFreeMemory;
-PFN_vkCreateDescriptorPool VkCreateDescriptorPool;
-PFN_vkCreateDescriptorSetLayout VkCreateDescriptorSetLayout;
-PFN_vkAllocateDescriptorSets VkAllocateDescriptorSets;
-PFN_vkUpdateDescriptorSets VkUpdateDescriptorSets;
-PFN_vkCreatePipelineLayout VkCreatePipelineLayout;
-
-PFN_vkGetDeviceQueue VkGetDeviceQueue;
-PFN_vkCreateCommandPool VkCreateCommandPool;
-PFN_vkDestroyCommandPool VkDestroyCommandPool;
-
-PFN_vkDestroyPipelineLayout VkDestroyPipelineLayout;
-PFN_vkDestroyDescriptorSetLayout VkDestroyDescriptorSetLayout;
-PFN_vkDestroyDescriptorPool VkDestroyDescriptorPool;
-
-PFN_vkCreateShaderModule VkCreateShaderModule;
-PFN_vkCreateComputePipelines VkCreateComputePipelines;
-PFN_vkDestroyPipeline VkDestroyPipeline;
-PFN_vkDestroyShaderModule VkDestroyShaderModule;
-
-PFN_vkAllocateCommandBuffers VkAllocateCommandBuffers;
-PFN_vkCreateFence VkCreateFence;
-
-PFN_vkBeginCommandBuffer VkBeginCommandBuffer;
-PFN_vkEndCommandBuffer VkEndCommandBuffer;
-PFN_vkCmdBindPipeline VkCmdBindPipeline;
-PFN_vkCmdBindDescriptorSets VkCmdBindDescriptorSets;
-PFN_vkCmdDispatch VkCmdDispatch;
-PFN_vkQueueSubmit VkQueueSubmit;
-PFN_vkWaitForFences VkWaitForFences;
-PFN_vkQueueWaitIdle VkQueueWaitIdle;
-PFN_vkDestroyFence VkDestroyFence;
+PFN_vkGetInstanceProcAddr vkGetInstanceProcAddr;
+PFN_vkCreateInstance vkCreateInstance;
+PFN_vkEnumerateInstanceVersion vkEnumerateInstanceVersion;
+PFN_vkEnumerateInstanceExtensionProperties vkEnumerateInstanceExtensionProperties;
+PFN_vkEnumerateInstanceLayerProperties vkEnumerateInstanceLayerProperties;
 
 Vulkan* LoadVulkan(int* err) {
 	char* driver = getenv("VULKAN_DRIVER");
@@ -112,8 +61,8 @@ void* GetFunction(Vulkan* vulkan, const char* name) {
 
 void DestroyVulkan(Vulkan* vulkan) {
     VulkanContext* ctx = vulkan->data;
-    VkDestroyDevice(ctx->logicalDevice, NULL);
-    VkDestroyInstance(ctx->instance, NULL);
+    vkDestroyDevice(ctx->logicalDevice, NULL);
+    vkDestroyInstance(ctx->instance, NULL);
 }
 
 static int DeviceScore(VkPhysicalDeviceProperties* prop) {
@@ -149,23 +98,13 @@ static int DeviceScore(VkPhysicalDeviceProperties* prop) {
 static int ConfigureVulkanDevice(Vulkan* vulkan) {
     VulkanContext* ctx = vulkan->data;
 
-    VkEnumeratePhysicalDevices = (PFN_vkEnumeratePhysicalDevices)
-        VkGetInstanceProcAddr(ctx->instance, "vkEnumeratePhysicalDevices");
-    if (!VkEnumeratePhysicalDevices)
-        return FAULTY_GPU_DRIVER;
-
     uint32_t devices = 0;
-    VkEnumeratePhysicalDevices(ctx->instance, &devices, NULL);
+    vkEnumeratePhysicalDevices(ctx->instance, &devices, NULL);
     if (!devices) 
         return NO_DEVICE_AVAILABLE;
 
     VkPhysicalDevice* physDevices = Alloc(devices * sizeof(VkPhysicalDevice));
-    VkEnumeratePhysicalDevices(ctx->instance, &devices, physDevices);
-
-    VkGetPhysicalDeviceProperties = (PFN_vkGetPhysicalDeviceProperties)
-        VkGetInstanceProcAddr(ctx->instance, "vkGetPhysicalDeviceProperties");
-    if (!VkGetPhysicalDeviceProperties)
-        return FAULTY_GPU_DRIVER;
+    vkEnumeratePhysicalDevices(ctx->instance, &devices, physDevices);
 
     VkPhysicalDeviceProperties selectedDeviceProps;
     uint32_t selectedDevice = 0;
@@ -173,7 +112,7 @@ static int ConfigureVulkanDevice(Vulkan* vulkan) {
     
     for (uint32_t i = 0; i < devices; i++) {
         VkPhysicalDeviceProperties devProps;
-        VkGetPhysicalDeviceProperties(physDevices[i], &devProps);
+        vkGetPhysicalDeviceProperties(physDevices[i], &devProps);
         printf("Device detected: %s\n", devProps.deviceName);
         uint32_t devScore = DeviceScore(&devProps);
         if (devScore > score) {
@@ -185,18 +124,14 @@ static int ConfigureVulkanDevice(Vulkan* vulkan) {
     ctx->physicalDevice = physDevices[selectedDevice];
 
     uint32_t qfcnt = 0;
-    VkGetPhysicalDeviceQueueFamilyProperties = (PFN_vkGetPhysicalDeviceQueueFamilyProperties)
-        VkGetInstanceProcAddr(ctx->instance, "vkGetPhysicalDeviceQueueFamilyProperties");
-    if (!VkGetPhysicalDeviceQueueFamilyProperties)
-        return FAULTY_GPU_DRIVER;
 
-    VkGetPhysicalDeviceQueueFamilyProperties(physDevices[selectedDevice], &qfcnt, NULL);
+    vkGetPhysicalDeviceQueueFamilyProperties(physDevices[selectedDevice], &qfcnt, NULL);
     if (!qfcnt) 
         return NO_QUEUE_AVAILABLE;
 
     VkQueueFamilyProperties* qfp = Alloc(sizeof(VkQueueFamilyProperties) * qfcnt);
 
-    VkGetPhysicalDeviceQueueFamilyProperties(physDevices[selectedDevice], &qfcnt, qfp);
+    vkGetPhysicalDeviceQueueFamilyProperties(physDevices[selectedDevice], &qfcnt, qfp);
     uint32_t selectedQueueFamily = 0;
 
     for (uint32_t i = 0; i < qfcnt; i++) {
@@ -206,11 +141,6 @@ static int ConfigureVulkanDevice(Vulkan* vulkan) {
             break;
         }
     }
-
-    VkCreateDevice = (PFN_vkCreateDevice) VkGetInstanceProcAddr(ctx->instance, "vkCreateDevice");
-    VkDestroyDevice = (PFN_vkDestroyDevice) VkGetInstanceProcAddr(ctx->instance, "vkDestroyDevice");
-    if (!VkCreateDevice || !VkDestroyDevice)
-        return FAULTY_GPU_DRIVER;
 
     float prio = 1.0f;
 
@@ -236,24 +166,15 @@ static int ConfigureVulkanDevice(Vulkan* vulkan) {
         .pEnabledFeatures = NULL
     };
 
-    if (VkCreateDevice(physDevices[selectedDevice], &deviceCreateInfo
+    if (vkCreateDevice(physDevices[selectedDevice], &deviceCreateInfo
         , NULL, &ctx->logicalDevice) != VK_SUCCESS)
         return FAULTY_GPU_DRIVER;
     
-    VkGetDeviceQueue = (PFN_vkGetDeviceQueue) 
-        VkGetInstanceProcAddr(ctx->instance, "vkGetDeviceQueue");
-    if (!VkGetDeviceQueue)
-        return FAULTY_GPU_DRIVER;
 
-    VkGetDeviceQueue(ctx->logicalDevice, selectedQueueFamily, 0, &ctx->queue);
+    vkGetDeviceQueue(ctx->logicalDevice, selectedQueueFamily, 0, &ctx->queue);
     ctx->selectedQueueFamily = selectedQueueFamily;
 
-    VkGetPhysicalDeviceMemoryProperties = (PFN_vkGetPhysicalDeviceMemoryProperties)
-        VkGetInstanceProcAddr(ctx->instance, "vkGetPhysicalDeviceMemoryProperties");
-    if (!VkGetPhysicalDeviceMemoryProperties)
-        return FAULTY_GPU_DRIVER;
-
-    VkGetPhysicalDeviceMemoryProperties(ctx->physicalDevice, &ctx->mprops);
+    vkGetPhysicalDeviceMemoryProperties(ctx->physicalDevice, &ctx->mprops);
     return SUCCESS;
 }
 
@@ -298,38 +219,36 @@ static void ChooseMemoryAllocationStrategy(Vulkan* vulkan) {
 }
 
 int InitVulkan(Vulkan* vulkan) {
-    VkGetInstanceProcAddr = GetFunction(vulkan, "vkGetInstanceProcAddr");
-    VkCreateInstance = (PFN_vkCreateInstance) 
-        VkGetInstanceProcAddr(NULL, "vkCreateInstance");
-    if (!VkCreateInstance)
+    vkGetInstanceProcAddr = GetFunction(vulkan, "vkGetInstanceProcAddr");
+    vkCreateInstance = (PFN_vkCreateInstance) vkGetInstanceProcAddr(NULL, "vkCreateInstance");
+    if (!vkCreateInstance)
         return FAULTY_GPU_DRIVER;
 
-    VkEnumerateInstanceVersion = (PFN_vkEnumerateInstanceVersion) 
-        VkGetInstanceProcAddr(NULL, "vkEnumerateInstanceVersion");
-    if (!VkEnumerateInstanceVersion)
+    vkEnumerateInstanceVersion = (PFN_vkEnumerateInstanceVersion) vkGetInstanceProcAddr(NULL, "vkEnumerateInstanceVersion");
+    if (!vkEnumerateInstanceVersion)
         return FAULTY_GPU_DRIVER;
 
-    VkEnumerateInstanceExtensionProperties = (PFN_vkEnumerateInstanceExtensionProperties)
-        VkGetInstanceProcAddr(NULL, "vkEnumerateInstanceExtensionProperties");
-    if (!VkEnumerateInstanceExtensionProperties)
+    vkEnumerateInstanceExtensionProperties = (PFN_vkEnumerateInstanceExtensionProperties)
+        vkGetInstanceProcAddr(NULL, "vkEnumerateInstanceExtensionProperties");
+    if (!vkEnumerateInstanceExtensionProperties)
         return FAULTY_GPU_DRIVER;
 
-    VkEnumerateInstanceLayerProperties = (PFN_vkEnumerateInstanceLayerProperties)
-        VkGetInstanceProcAddr(NULL, "vkEnumerateInstanceLayerProperties");
-    if (!VkEnumerateInstanceLayerProperties)
+    vkEnumerateInstanceLayerProperties = (PFN_vkEnumerateInstanceLayerProperties)
+        vkGetInstanceProcAddr(NULL, "vkEnumerateInstanceLayerProperties");
+    if (!vkEnumerateInstanceLayerProperties)
         return FAULTY_GPU_DRIVER;
 
-    if (VkEnumerateInstanceVersion(&vulkan->version) != VK_SUCCESS) 
+    if (vkEnumerateInstanceVersion(&vulkan->version) != VK_SUCCESS) 
         return UNKNOWN_ERROR;
 
     uint32_t layers = 0;
-    VkEnumerateInstanceLayerProperties(&layers, NULL);
+    vkEnumerateInstanceLayerProperties(&layers, NULL);
 	const char* validation = "VK_LAYER_KHRONOS_validation";
     int enable_layers = 0;
 
     if (layers) {
 		VkLayerProperties* lprops = Alloc(layers * sizeof(VkLayerProperties));
-        VkEnumerateInstanceLayerProperties(&layers, lprops);
+        vkEnumerateInstanceLayerProperties(&layers, lprops);
         for (int i = 0; i < layers; i++) {
             if (strcmp(validation, lprops[i].layerName) == 0) {
                 enable_layers = 1;
@@ -361,182 +280,19 @@ int InitVulkan(Vulkan* vulkan) {
         .ppEnabledExtensionNames = NULL
     };
 
-    if (VkCreateInstance(&instanceCreateInfo, NULL, &ctx->instance) != VK_SUCCESS) 
+    if (vkCreateInstance(&instanceCreateInfo, NULL, &ctx->instance) != VK_SUCCESS) 
         return UNKNOWN_ERROR;
 
-    VkDestroyInstance = (PFN_vkDestroyInstance) 
-        VkGetInstanceProcAddr(ctx->instance, "vkDestroyInstance");
-    if (!VkDestroyInstance)
-        return FAULTY_GPU_DRIVER;
-
     int ret;
+
+    if (InitVulkanPrivate(ctx->instance) != SUCCESS)
+        return FAULTY_GPU_DRIVER;
 
     ret = ConfigureVulkanDevice(vulkan);
     if (ret)
         return ret;
 
     ChooseMemoryAllocationStrategy(vulkan);
-
-    VkCreateBuffer = (PFN_vkCreateBuffer) VkGetInstanceProcAddr(ctx->instance, "vkCreateBuffer");
-    if (!VkCreateBuffer) 
-        return FAULTY_GPU_DRIVER;
-
-    VkGetBufferMemoryRequirements = (PFN_vkGetBufferMemoryRequirements) 
-        VkGetInstanceProcAddr(ctx->instance, "vkGetBufferMemoryRequirements");
-    if (!VkGetBufferMemoryRequirements)
-        return FAULTY_GPU_DRIVER;
-
-    VkAllocateMemory = (PFN_vkAllocateMemory) 
-        VkGetInstanceProcAddr(ctx->instance, "vkAllocateMemory");
-    if (!VkAllocateMemory)
-        return FAULTY_GPU_DRIVER;
-
-    
-    VkMapMemory = (PFN_vkMapMemory) VkGetInstanceProcAddr(ctx->instance, "vkMapMemory");
-    if (!VkMapMemory)
-        return FAULTY_GPU_DRIVER;
-    
-    VkUnmapMemory = (PFN_vkUnmapMemory) VkGetInstanceProcAddr(ctx->instance, "vkUnmapMemory");
-    if (!VkUnmapMemory)
-        return FAULTY_GPU_DRIVER;
-
-    VkBindBufferMemory = (PFN_vkBindBufferMemory)
-        VkGetInstanceProcAddr(ctx->instance, "vkBindBufferMemory");
-    if (!VkBindBufferMemory)
-        return FAULTY_GPU_DRIVER;
-
-    VkFlushMappedMemoryRanges = (PFN_vkFlushMappedMemoryRanges) 
-        VkGetInstanceProcAddr(ctx->instance, "vkFlushMappedMemoryRanges");
-    if (!VkFlushMappedMemoryRanges)
-        return FAULTY_GPU_DRIVER;
-
-    VkDestroyBuffer = (PFN_vkDestroyBuffer) VkGetInstanceProcAddr(ctx->instance, "vkDestroyBuffer");
-    if (!VkDestroyBuffer)
-        return FAULTY_GPU_DRIVER;
-
-    VkFreeMemory = (PFN_vkFreeMemory) VkGetInstanceProcAddr(ctx->instance, "vkFreeMemory");
-    if (!VkFreeMemory)
-        return FAULTY_GPU_DRIVER;
-
-    VkCreateDescriptorPool =  (PFN_vkCreateDescriptorPool)
-        VkGetInstanceProcAddr(ctx->instance, "vkCreateDescriptorPool");
-    if (!VkCreateDescriptorPool)
-        return FAULTY_GPU_DRIVER;
-
-    VkCreateDescriptorSetLayout = (PFN_vkCreateDescriptorSetLayout)
-        VkGetInstanceProcAddr(ctx->instance, "vkCreateDescriptorSetLayout");
-    if (!VkCreateDescriptorSetLayout)
-        return FAULTY_GPU_DRIVER;
-
-    VkAllocateDescriptorSets = (PFN_vkAllocateDescriptorSets)
-        VkGetInstanceProcAddr(ctx->instance, "vkAllocateDescriptorSets");
-    if (!VkAllocateDescriptorSets)
-        return FAULTY_GPU_DRIVER;
-
-    VkUpdateDescriptorSets =  (PFN_vkUpdateDescriptorSets)
-        VkGetInstanceProcAddr(ctx->instance, "vkUpdateDescriptorSets");
-    if (!VkUpdateDescriptorSets)
-        return FAULTY_GPU_DRIVER;
-
-    VkCreatePipelineLayout = (PFN_vkCreatePipelineLayout)
-        VkGetInstanceProcAddr(ctx->instance, "vkCreatePipelineLayout");
-    if (!VkCreatePipelineLayout)
-        return FAULTY_GPU_DRIVER;
-
-    VkGetDeviceQueue = (PFN_vkGetDeviceQueue)
-        VkGetInstanceProcAddr(ctx->instance, "vkGetDeviceQueue");
-    if (!VkGetDeviceQueue)
-        return FAULTY_GPU_DRIVER;
-
-    VkCreateCommandPool = (PFN_vkCreateCommandPool)
-        VkGetInstanceProcAddr(ctx->instance, "vkCreateCommandPool");
-    if (!VkCreateCommandPool)
-        return FAULTY_GPU_DRIVER;
-
-    VkDestroyCommandPool = (PFN_vkDestroyCommandPool)
-        VkGetInstanceProcAddr(ctx->instance, "vkDestroyCommandPool");
-    if (!VkDestroyCommandPool)
-        return FAULTY_GPU_DRIVER;
-
-    VkDestroyPipelineLayout = (PFN_vkDestroyPipelineLayout)
-        VkGetInstanceProcAddr(ctx->instance, "vkDestroyPipelineLayout");
-    if (!VkDestroyPipelineLayout)
-        return FAULTY_GPU_DRIVER;
-
-    VkDestroyDescriptorSetLayout = (PFN_vkDestroyDescriptorSetLayout)
-        VkGetInstanceProcAddr(ctx->instance, "vkDestroyDescriptorSetLayout");
-    if (!VkDestroyDescriptorSetLayout)
-        return FAULTY_GPU_DRIVER;
-
-    VkDestroyDescriptorPool = (PFN_vkDestroyDescriptorPool)
-        VkGetInstanceProcAddr(ctx->instance, "vkDestroyDescriptorPool");
-    if (!VkDestroyDescriptorPool)
-        return FAULTY_GPU_DRIVER;
-
-    VkCreateShaderModule = (PFN_vkCreateShaderModule)
-        VkGetInstanceProcAddr(ctx->instance, "vkCreateShaderModule");
-    if (!VkCreateShaderModule)
-        return FAULTY_GPU_DRIVER;
-
-    VkCreateComputePipelines = (PFN_vkCreateComputePipelines)
-        VkGetInstanceProcAddr(ctx->instance, "vkCreateComputePipelines");
-    if (!VkCreateComputePipelines)
-        return FAULTY_GPU_DRIVER;
-
-    VkDestroyPipeline = (PFN_vkDestroyPipeline)
-        VkGetInstanceProcAddr(ctx->instance, "vkDestroyPipeline");
-    if (!VkDestroyPipeline)
-        return FAULTY_GPU_DRIVER;
-
-    VkDestroyShaderModule = (PFN_vkDestroyShaderModule)
-        VkGetInstanceProcAddr(ctx->instance, "vkDestroyShaderModule");
-    if (!VkDestroyShaderModule)
-        return FAULTY_GPU_DRIVER;
-
-    VkAllocateCommandBuffers = (PFN_vkAllocateCommandBuffers)
-        VkGetInstanceProcAddr(ctx->instance, "vkAllocateCommandBuffers");
-    if (!VkAllocateCommandBuffers)
-        return FAULTY_GPU_DRIVER;
-
-    VkCreateFence = (PFN_vkCreateFence) VkGetInstanceProcAddr(ctx->instance, "vkCreateFence");
-    if (!VkCreateFence)
-        return FAULTY_GPU_DRIVER;
-
-    VkBeginCommandBuffer = (PFN_vkBeginCommandBuffer) VkGetInstanceProcAddr(ctx->instance, "vkBeginCommandBuffer");
-    if (!VkBeginCommandBuffer)
-        return FAULTY_GPU_DRIVER;
-
-    VkEndCommandBuffer = (PFN_vkEndCommandBuffer) VkGetInstanceProcAddr(ctx->instance, "vkEndCommandBuffer");
-    if (!VkEndCommandBuffer)
-        return FAULTY_GPU_DRIVER;
-
-    VkCmdBindDescriptorSets = (PFN_vkCmdBindDescriptorSets) VkGetInstanceProcAddr(ctx->instance, "vkCmdBindDescriptorSets");
-    if (!VkCmdBindDescriptorSets)
-        return FAULTY_GPU_DRIVER;
-
-    VkCmdBindPipeline = (PFN_vkCmdBindPipeline) VkGetInstanceProcAddr(ctx->instance, "vkCmdBindPipeline");
-    if (!VkCmdBindPipeline)
-        return FAULTY_GPU_DRIVER;
-
-    VkCmdDispatch = (PFN_vkCmdDispatch) VkGetInstanceProcAddr(ctx->instance, "vkCmdDispatch");
-    if (!VkCmdDispatch)
-        return FAULTY_GPU_DRIVER;
-
-    VkQueueSubmit = (PFN_vkQueueSubmit) VkGetInstanceProcAddr(ctx->instance, "vkQueueSubmit");
-    if (!VkQueueSubmit)
-        return FAULTY_GPU_DRIVER;
-
-    VkWaitForFences = (PFN_vkWaitForFences) VkGetInstanceProcAddr(ctx->instance, "vkWaitForFences");
-    if (!VkWaitForFences)
-        return FAULTY_GPU_DRIVER;
-
-    VkQueueWaitIdle = (PFN_vkQueueWaitIdle) VkGetInstanceProcAddr(ctx->instance, "vkQueueWaitIdle");
-    if (!VkQueueWaitIdle)
-        return FAULTY_GPU_DRIVER;
-
-    VkDestroyFence = (PFN_vkDestroyFence) VkGetInstanceProcAddr(ctx->instance, "vkDestroyFence");
-    if (!VkDestroyFence)
-        return FAULTY_GPU_DRIVER;
     
     return SUCCESS;
 }

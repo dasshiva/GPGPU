@@ -21,6 +21,7 @@ int main(int argc, const char* argv[]) {
     fprintf(output, "#ifndef __GENERATED_H__\n");
     fprintf(output, "#define __GENERATED_H__\n");
     fprintf(output, "// AUTO-GENERATED: DO NOT EDIT\n");
+    fprintf(output, "#define VK_NO_PROTOTYPES\n");
     fprintf(output, "#include <vulkan/vulkan.h>\n");
     while (1) {
         char function[100] = {0};
@@ -37,7 +38,6 @@ int main(int argc, const char* argv[]) {
         }
 
         fprintf(output, "extern PFN_%s ", function);
-        function[0] = toupper(function[0]);
         fprintf(output, "%s;\n", function);
     }
     
@@ -49,9 +49,10 @@ int main(int argc, const char* argv[]) {
 
     fprintf(pvt, "#ifndef __GENERATED_PVT_H__\n");
     fprintf(pvt, "#define __GENERATED_PVT_H__\n");
+    fprintf(pvt, "#define VK_NO_PROTOTYPES\n");
     fprintf(pvt, "#include <vulkan/vulkan.h>\n");
     fprintf(pvt, "// AUTO-GENERATED: DO NOT EDIT\n");
-    fprintf(pvt, "struct LoadFunction {const char* name; void** sig;};\n ");
+    fprintf(pvt, "struct LoadFunction {const char* name; void** sig;};\n");
 
      while (1) {
         char function[100] = {0};
@@ -68,7 +69,6 @@ int main(int argc, const char* argv[]) {
         }
 
         fprintf(pvt, "PFN_%s ", function);
-        function[0] = toupper(function[0]);
         fprintf(pvt, "%s;\n", function);
     }
 
@@ -90,14 +90,11 @@ int main(int argc, const char* argv[]) {
         }
 
         fprintf(pvt, "{\"%s\", ", function);
-        function[0] = toupper(function[0]);
         fprintf(pvt, " (void**)&%s},\n", function);
     }
 
     fprintf(pvt, "{0, 0}};\n");
     fseek(file, 0, SEEK_SET);
-
-   
 
     fprintf(pvt, "#endif");
     fclose(pvt);

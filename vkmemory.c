@@ -32,14 +32,14 @@ Resource CreateResource(Vulkan* vulkan, void* data, uint64_t size, int* err) {
         };
 
         VulkanResource* resource = Alloc(sizeof(VulkanResource));
-        if (VkCreateBuffer(ctx->logicalDevice, &bufferCreateInfo, NULL, &resource->buffer)
+        if (vkCreateBuffer(ctx->logicalDevice, &bufferCreateInfo, NULL, &resource->buffer)
             != VK_SUCCESS) {
                 *err = OUT_OF_MEMORY;
                 return NULL;
         }
 
         VkMemoryRequirements memReqs;
-        VkGetBufferMemoryRequirements(ctx->logicalDevice, resource->buffer, &memReqs);
+        vkGetBufferMemoryRequirements(ctx->logicalDevice, resource->buffer, &memReqs);
         resource->size = memReqs.size;
 
         VkMemoryAllocateInfo memoryAllocateInfo = {
@@ -49,14 +49,14 @@ Resource CreateResource(Vulkan* vulkan, void* data, uint64_t size, int* err) {
             .memoryTypeIndex = memoryIndex
         };
 
-        if (VkAllocateMemory(ctx->logicalDevice, &memoryAllocateInfo, NULL, &resource->backingMemory)
+        if (vkAllocateMemory(ctx->logicalDevice, &memoryAllocateInfo, NULL, &resource->backingMemory)
                 != VK_SUCCESS) {
             *err = OUT_OF_GPU_MEMORY;
             return NULL;
         }
 
         void* mapped;
-        if (VkMapMemory(ctx->logicalDevice, resource->backingMemory, 0, 
+        if (vkMapMemory(ctx->logicalDevice, resource->backingMemory, 0, 
                     resource->size, 0, &mapped) != VK_SUCCESS) {
             *err = UNKNOWN_ERROR;
             return NULL;
@@ -73,11 +73,11 @@ Resource CreateResource(Vulkan* vulkan, void* data, uint64_t size, int* err) {
                 .size = resource->size
             };
 
-            VkFlushMappedMemoryRanges(ctx->logicalDevice, 1, &mappedMemoryRange);
+            vkFlushMappedMemoryRanges(ctx->logicalDevice, 1, &mappedMemoryRange);
         }
 
-        VkUnmapMemory(ctx->logicalDevice, resource->backingMemory);
-        VkBindBufferMemory(ctx->logicalDevice, resource->buffer, resource->backingMemory, 0);
+        vkUnmapMemory(ctx->logicalDevice, resource->backingMemory);
+        vkBindBufferMemory(ctx->logicalDevice, resource->buffer, resource->backingMemory, 0);
 
         return resource;
 
@@ -98,8 +98,8 @@ void FreeResource(Vulkan* vulkan, Resource resource) {
     VulkanContext* ctx = vulkan->data;
 
     if (ctx->flags & ALLOCATE_DIRECT) {
-        VkFreeMemory(ctx->logicalDevice, res->backingMemory, NULL);
-        VkDestroyBuffer(ctx->logicalDevice, res->buffer, NULL);
+        vkFreeMemory(ctx->logicalDevice, res->backingMemory, NULL);
+        vkDestroyBuffer(ctx->logicalDevice, res->buffer, NULL);
     }
     else {
         // Implement GPU indirect de-allocation
