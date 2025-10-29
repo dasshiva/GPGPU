@@ -125,6 +125,7 @@ static int ConfigureVulkanDevice(Vulkan* vulkan) {
     uint32_t extensions = 0;
     vkEnumerateDeviceExtensionProperties(ctx->physicalDevice, NULL, &extensions, NULL);
     if (extensions) {
+        printf("Device Extensions \n");
         VkExtensionProperties* extProps = Alloc(sizeof(VkExtensionProperties) * extensions);
         vkEnumerateDeviceExtensionProperties(ctx->physicalDevice, NULL, &extensions, extProps);
         for (uint32_t i = 0; i < extensions; i++) {
@@ -242,6 +243,18 @@ int InitVulkan(Vulkan* vulkan) {
         vkGetInstanceProcAddr(NULL, "vkEnumerateInstanceExtensionProperties");
     if (!vkEnumerateInstanceExtensionProperties)
         return FAULTY_GPU_DRIVER;
+
+    VkExtensionProperties* instanceExtensions;
+    uint32_t exts = 0;
+    vkEnumerateInstanceExtensionProperties(NULL, &exts, NULL);
+    if (exts) {
+        printf("Instance Extensions \n");
+        instanceExtensions = Alloc(exts * sizeof(VkExtensionProperties));
+        vkEnumerateInstanceExtensionProperties(NULL, &exts, instanceExtensions);
+        for (uint32_t i = 0; i < exts; i++) {
+            printf("Extension %s - Version %d\n", instanceExtensions[i].extensionName, instanceExtensions[i].specVersion);
+        }
+    }
 
     vkEnumerateInstanceLayerProperties = (PFN_vkEnumerateInstanceLayerProperties)
         vkGetInstanceProcAddr(NULL, "vkEnumerateInstanceLayerProperties");
