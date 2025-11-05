@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "include/alloc.h"
+#include "../include/alloc.h"
 
 void* Alloc(uint64_t size) {
     if (!size) {

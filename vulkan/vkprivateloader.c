@@ -1,5 +1,5 @@
-#include "include/generated/private.h"
-#include "include/private.h"
+#include "../include/vulkan/generated/private.h"
+#include "../include/vulkan/private.h"
 
 int InitVulkanPrivate(VkInstance instance) {
     int i = 0;

@@ -1,13 +1,13 @@
-#include "include/defs.h"
-#include "include/alloc.h"
-#include "include/private.h"
+#include "../include/kc.h"
+#include "../include/alloc.h"
+#include "../include/vulkan/private.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <vulkan/vulkan_core.h>
 
-Resource CreateResource(Vulkan* vulkan, void* data, uint64_t size, int* err) {
+Resource CreateVulkanResource(Vulkan* vulkan, void* data, uint64_t size, int* err) {
     if (!size)
         return NULL;
 
@@ -89,7 +89,7 @@ Resource CreateResource(Vulkan* vulkan, void* data, uint64_t size, int* err) {
 
 }
 
-void FreeResource(Vulkan* vulkan, Resource resource) {
+void FreeVulkanResource(Vulkan* vulkan, Resource resource) {
     VulkanResource* res = resource;
     if (!res) {
         puts("FreeResource(): resource == NULL");

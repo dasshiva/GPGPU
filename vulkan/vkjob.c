@@ -1,12 +1,13 @@
-#include "include/defs.h"
-#include "include/alloc.h"
-#include "include/private.h"
+#include "../include/kc.h"
+#include "../include/alloc.h"
+#include "../include/vulkan/private.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 
-Job CreateJob(Vulkan* vulkan, Resource* inputs, int* err) {
+Job CreateVulkanJob(Vulkan* vulkan, Resource* inputs, int* err) {
     if (!vulkan) {
         puts("CreateJob(): vulkan == NULL");
         abort();
@@ -185,7 +186,7 @@ Job CreateJob(Vulkan* vulkan, Resource* inputs, int* err) {
     return ret;
 }
 
-int SubmitJob(Vulkan* vulkan, Job job, Resource* inputs) {
+int SubmitVulkanJob(Vulkan* vulkan, Job job, Resource* inputs) {
     VulkanJob* vjob = job;
     VulkanContext* ctx = vulkan->data;
 
@@ -263,7 +264,7 @@ int SubmitJob(Vulkan* vulkan, Job job, Resource* inputs) {
     return SUCCESS;
 }
 
-void DestroyJob(Vulkan* vulkan, Job job) {
+void DestroyVulkanJob(Vulkan* vulkan, Job job) {
     VulkanJob* vjob = job;
     VulkanContext* ctx = vulkan->data;
     vkDestroyCommandPool(ctx->logicalDevice, vjob->cpool, NULL);

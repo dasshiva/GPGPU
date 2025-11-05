@@ -1,4 +1,5 @@
-gcc imports-gen.c -o imports-gen
-mkdir -p include/generated
-./imports-gen vulkan.txt include/generated/public.h include/generated/private.h
-gcc hello.c alloc.c vkjob.c vkloader.c vkmemory.c vkprivateloader.c kc.c -o blue
+set -e
+gcc vulkan/imports-gen.c -o aux/imports-gen
+mkdir -p include/vulkan/generated
+aux/imports-gen vulkan/vulkan.txt include/vulkan/generated/public.h include/vulkan/generated/private.h
+gcc kc/*.c vulkan/vk*.c -o bin/blue 

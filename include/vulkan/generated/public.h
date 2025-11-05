@@ -1,0 +1,49 @@
+#ifndef __GENERATED_H__
+#define __GENERATED_H__
+// AUTO-GENERATED: DO NOT EDIT
+#define VK_NO_PROTOTYPES
+#include <vulkan/vulkan.h>
+extern PFN_vkDestroyInstance vkDestroyInstance;
+extern PFN_vkEnumeratePhysicalDevices vkEnumeratePhysicalDevices;
+extern PFN_vkGetPhysicalDeviceProperties vkGetPhysicalDeviceProperties;
+extern PFN_vkGetPhysicalDeviceQueueFamilyProperties vkGetPhysicalDeviceQueueFamilyProperties;
+extern PFN_vkCreateDevice vkCreateDevice;
+extern PFN_vkDestroyDevice vkDestroyDevice;
+extern PFN_vkGetPhysicalDeviceMemoryProperties vkGetPhysicalDeviceMemoryProperties;
+extern PFN_vkCreateBuffer vkCreateBuffer;
+extern PFN_vkGetBufferMemoryRequirements vkGetBufferMemoryRequirements;
+extern PFN_vkAllocateMemory vkAllocateMemory;
+extern PFN_vkMapMemory vkMapMemory;
+extern PFN_vkUnmapMemory vkUnmapMemory;
+extern PFN_vkBindBufferMemory vkBindBufferMemory;
+extern PFN_vkFlushMappedMemoryRanges vkFlushMappedMemoryRanges;
+extern PFN_vkDestroyBuffer vkDestroyBuffer;
+extern PFN_vkFreeMemory vkFreeMemory;
+extern PFN_vkCreateDescriptorPool vkCreateDescriptorPool;
+extern PFN_vkCreateDescriptorSetLayout vkCreateDescriptorSetLayout;
+extern PFN_vkAllocateDescriptorSets vkAllocateDescriptorSets;
+extern PFN_vkUpdateDescriptorSets vkUpdateDescriptorSets;
+extern PFN_vkCreatePipelineLayout vkCreatePipelineLayout;
+extern PFN_vkGetDeviceQueue vkGetDeviceQueue;
+extern PFN_vkCreateCommandPool vkCreateCommandPool;
+extern PFN_vkDestroyCommandPool vkDestroyCommandPool;
+extern PFN_vkDestroyPipelineLayout vkDestroyPipelineLayout;
+extern PFN_vkDestroyDescriptorSetLayout vkDestroyDescriptorSetLayout;
+extern PFN_vkDestroyDescriptorPool vkDestroyDescriptorPool;
+extern PFN_vkCreateShaderModule vkCreateShaderModule;
+extern PFN_vkCreateComputePipelines vkCreateComputePipelines;
+extern PFN_vkDestroyPipeline vkDestroyPipeline;
+extern PFN_vkDestroyShaderModule vkDestroyShaderModule;
+extern PFN_vkAllocateCommandBuffers vkAllocateCommandBuffers;
+extern PFN_vkCreateFence vkCreateFence;
+extern PFN_vkBeginCommandBuffer vkBeginCommandBuffer;
+extern PFN_vkEndCommandBuffer vkEndCommandBuffer;
+extern PFN_vkCmdBindPipeline vkCmdBindPipeline;
+extern PFN_vkCmdBindDescriptorSets vkCmdBindDescriptorSets;
+extern PFN_vkCmdDispatch vkCmdDispatch;
+extern PFN_vkQueueSubmit vkQueueSubmit;
+extern PFN_vkWaitForFences vkWaitForFences;
+extern PFN_vkQueueWaitIdle vkQueueWaitIdle;
+extern PFN_vkDestroyFence vkDestroyFence;
+extern PFN_vkEnumerateDeviceExtensionProperties vkEnumerateDeviceExtensionProperties;
+#endif

@@ -4,9 +4,9 @@
 #include <limits.h>
 #include <string.h>
 
-#include "include/defs.h"
-#include "include/alloc.h"
-#include "include/private.h"
+#include "../include/kc.h"
+#include "../include/alloc.h"
+#include "../include/vulkan/private.h"
 
 PFN_vkGetInstanceProcAddr vkGetInstanceProcAddr;
 PFN_vkCreateInstance vkCreateInstance;
