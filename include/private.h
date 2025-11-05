@@ -48,4 +48,15 @@ typedef struct VulkanJob {
 
 int InitVulkanPrivate(VkInstance instance);
 
+typedef struct Context {
+    uint64_t driver;
+    Handle   handle;
+} Context; 
+
+Vulkan* LoadVulkan(int* err);
+void UnloadVulkan(Vulkan** vulkan);
+
+int InitVulkan(Vulkan* vulkan);
+void DestroyVulkan(Vulkan* vulkan);
+
 #endif

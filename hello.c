@@ -2,21 +2,15 @@
 #include "include/defs.h"
 
 int main() {
-    int err = SUCCESS;
-	Vulkan* vulkan = LoadVulkan(&err);
+	Handle handle = NULL;
+	int err = KC_Init(KC_USE_VULKAN, &handle);
 
-	if (!vulkan) {
-		printf("LoadVulkan() = %d\n", err);
+	if (err != SUCCESS) {
+		printf("Could not initialize KC = %d\n", err);
 		return 1;
 	}
 
-	int ret = InitVulkan(vulkan);
-	if (ret) {
-		printf("Could not initialize vulkan = %d\n", ret);
-		return 1;
-	}
-
-	int memory[] = {1, 2, 3, 4, 5, 6, 7, 8};
+	/*int memory[] = {1, 2, 3, 4, 5, 6, 7, 8};
 	Resource res = CreateResource(vulkan, memory, 32, &ret);
 	if (!res) {
 		printf("Could not allocate resource on GPU = %d\n", ret);
@@ -34,8 +28,9 @@ int main() {
 	DestroyJob(vulkan, job);
 
 	FreeResource(vulkan, res);
-	DestroyVulkan(vulkan);
-	UnloadVulkan(&vulkan);
+	*/
+
+	KC_Destroy(handle);
 
     return 0;
 }

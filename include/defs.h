@@ -12,7 +12,10 @@ enum Error {
     UNKNOWN_ERROR,
     OUT_OF_MEMORY,
     OUT_OF_GPU_MEMORY,
-    UNIMPLEMENTED
+    UNIMPLEMENTED,
+    REQUIRED_PARAMETER_NULL,
+    UNKNOWN_DRIVER,
+    STRUCT_OVERWRITE
 };
 
 typedef void* Handle;
@@ -33,10 +36,10 @@ Job CreateJob(Vulkan* vulkan, Resource* inputs, int* err);
 int SubmitJob(Vulkan* vulkan, Job job, Resource* inputs);
 void DestroyJob(Vulkan* vulkan, Job job);
 
-Vulkan* LoadVulkan(int* err);
-void UnloadVulkan(Vulkan** vulkan);
+#define KC_USE_VULKAN 0x56554C4B414E0000UL // "VULKAN\0\0"
+#define KC_USE_OPENGL 0x4F50454E47470000UL // "OPENGL\0\0"
 
-int InitVulkan(Vulkan* vulkan);
-void DestroyVulkan(Vulkan* vulkan);
+int KC_Init(uint64_t driver, Handle* handle);
+int KC_Destroy(Handle handle);
 
 #endif
